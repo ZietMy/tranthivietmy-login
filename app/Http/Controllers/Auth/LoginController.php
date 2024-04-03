@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-
+use Illuminate\Http\Request;
+use App\Models\User;
 class LoginController extends Controller
 {
     /*
@@ -35,5 +36,23 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+    }
+    protected function sendLoginResponse(Request $request)
+    {
+        $request->session()->regenerate();
+        // dd($sessionId);
+        $this->clearLoginAttempts($request);
+        
+        if ($response = $this->authenticated($request, $this->guard()->user())) {
+            return $response;
+        }
+        $sessionId=$request->session()->getId();
+        $user =$request->user();
+        $user->last_session=$sessionId;
+        $user->save();
+
+        return $request->wantsJson()
+                    ? new JsonResponse([], 204)
+                    : redirect()->intended($this->redirectPath());
     }
 }

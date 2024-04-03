@@ -23,6 +23,8 @@ class HomeController extends Controller
      */
     public function index()
     {
+        
+        // echo session()->getId();
         return view('home');
     }
 }
